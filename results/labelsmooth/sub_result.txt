@@ -1,0 +1,3 @@
+Subject 6 : Seed is: 1674
+Subject 6 : The best accuracy is: 0.6631944444444444
+Subject 6 : The average accuracy is: 0.5480711805555555
