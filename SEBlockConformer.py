@@ -62,6 +62,22 @@ cudnn.deterministic = True
 
 # writer = SummaryWriter('./TensorBoardX/')
 
+class SEBlock(nn.Module):
+    def __init__(self, channel, reduction=16):
+        super(SEBlock, self).__init__()
+        self.avg_pool = nn.AdaptiveAvgPool2d(1)
+        self.fc = nn.Sequential(
+            nn.Linear(channel, channel // reduction, bias=False),
+            nn.ReLU(inplace=True),
+            nn.Linear(channel // reduction, channel, bias=False),
+            nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        b, c, _, _ = x.size()
+        y = self.avg_pool(x).view(b, c)
+        y = self.fc(y).view(b, c, 1, 1)
+        return x * y.expand_as(x)
 
 # Convolution module
 # use conv to capture local features, instead of postion embedding.
@@ -76,6 +92,7 @@ class PatchEmbedding(nn.Module):
             nn.BatchNorm2d(40),
             nn.ELU(),
             nn.AvgPool2d((1, 75), (1, 15)),  # pooling acts as slicing to obtain 'patch' along the time dimension as in ViT
+            SEBlock(40, reduction=4),
             nn.Dropout(0.5),
         )
 
@@ -210,22 +227,6 @@ class Conformer(nn.Sequential):
             ClassificationHead(emb_size, n_classes)
         )
 
-class LabelSmoothingCrossEntropy(nn.Module):
-    def __init__(self, eps=0.1, reduction='mean'):
-        super(LabelSmoothingCrossEntropy, self).__init__()
-        self.eps = eps
-        self.reduction = reduction
-
-    def forward(self, output, target):
-        c = output.size()[-1]
-        log_preds = F.log_softmax(output, dim=-1)
-        if self.reduction == 'sum':
-            loss = -log_preds.sum()
-        else:
-            loss = -log_preds.sum(dim=-1)
-            if self.reduction == 'mean':
-                loss = loss.mean()
-        return loss * self.eps / c + (1 - self.eps) * F.nll_loss(log_preds, target, reduction=self.reduction)
 
 class ExP():
     def __init__(self, nsub):
@@ -250,8 +251,7 @@ class ExP():
 
         self.criterion_l1 = torch.nn.L1Loss().cuda()
         self.criterion_l2 = torch.nn.MSELoss().cuda()
-        #self.criterion_cls = torch.nn.CrossEntropyLoss().cuda()
-        self.criterion_cls = LabelSmoothingCrossEntropy().cuda()
+        self.criterion_cls = torch.nn.CrossEntropyLoss().cuda()
 
         self.model = Conformer().cuda()
         self.model = nn.DataParallel(self.model, device_ids=[i for i in range(len(gpus))])
@@ -436,7 +436,6 @@ def main():
         starttime = datetime.datetime.now()
 
 
-        #seed_n = np.random.randint(2021)
         seed_n = 542
         print('seed is ' + str(seed_n))
         random.seed(seed_n)

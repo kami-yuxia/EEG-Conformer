@@ -1,3 +1,7 @@
 Subject 6 : Seed is: 1674
 Subject 6 : The best accuracy is: 0.6631944444444444
 Subject 6 : The average accuracy is: 0.5480711805555555
+
+Subject 6 : Seed is: 542
+Subject 6 : The best accuracy is: 0.6319444444444444
+Subject 6 : The average accuracy is: 0.5304583333333337

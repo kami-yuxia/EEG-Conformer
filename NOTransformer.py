@@ -206,26 +206,10 @@ class Conformer(nn.Sequential):
         super().__init__(
 
             PatchEmbedding(emb_size),
-            TransformerEncoder(depth, emb_size),
+            #TransformerEncoder(depth, emb_size),
             ClassificationHead(emb_size, n_classes)
         )
 
-class LabelSmoothingCrossEntropy(nn.Module):
-    def __init__(self, eps=0.1, reduction='mean'):
-        super(LabelSmoothingCrossEntropy, self).__init__()
-        self.eps = eps
-        self.reduction = reduction
-
-    def forward(self, output, target):
-        c = output.size()[-1]
-        log_preds = F.log_softmax(output, dim=-1)
-        if self.reduction == 'sum':
-            loss = -log_preds.sum()
-        else:
-            loss = -log_preds.sum(dim=-1)
-            if self.reduction == 'mean':
-                loss = loss.mean()
-        return loss * self.eps / c + (1 - self.eps) * F.nll_loss(log_preds, target, reduction=self.reduction)
 
 class ExP():
     def __init__(self, nsub):
@@ -250,8 +234,7 @@ class ExP():
 
         self.criterion_l1 = torch.nn.L1Loss().cuda()
         self.criterion_l2 = torch.nn.MSELoss().cuda()
-        #self.criterion_cls = torch.nn.CrossEntropyLoss().cuda()
-        self.criterion_cls = LabelSmoothingCrossEntropy().cuda()
+        self.criterion_cls = torch.nn.CrossEntropyLoss().cuda()
 
         self.model = Conformer().cuda()
         self.model = nn.DataParallel(self.model, device_ids=[i for i in range(len(gpus))])
@@ -432,12 +415,11 @@ def main():
     aver = 0
     result_write = open("./results/sub_result.txt", "w")
 
-    for i in range(5,6):
+    for i in range(9):
         starttime = datetime.datetime.now()
 
 
-        #seed_n = np.random.randint(2021)
-        seed_n = 542
+        seed_n = np.random.randint(2021)
         print('seed is ' + str(seed_n))
         random.seed(seed_n)
         np.random.seed(seed_n)

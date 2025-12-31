@@ -27,3 +27,8 @@ Subject 9 : The best accuracy is: 0.875
 Subject 9 : The average accuracy is: 0.7959600694444428
 **The average Best accuracy is: 0.8074845679012346
 The average Aver accuracy is: 0.6967102623456788
+
+
+Subject 6 : Seed is: 542
+Subject 6 : The best accuracy is: 0.6423611111111112
+Subject 6 : The average accuracy is: 0.5320659722222227

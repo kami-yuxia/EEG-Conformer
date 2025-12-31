@@ -418,12 +418,12 @@ def main():
     best = 0
     aver = 0
     result_write = open("./results/sub_result.txt", "w")
-
-    for i in range(9):
+    fixed_seeds = [1497, 1316, 1867, 1474, 1789, 1674, 1778, 1276, 1046]
+    for i in range(4,9):
+        if i ==5:
+            continue
         starttime = datetime.datetime.now()
-
-
-        seed_n = np.random.randint(2021)
+        seed_n = fixed_seeds[i]
         print('seed is ' + str(seed_n))
         random.seed(seed_n)
         np.random.seed(seed_n)
