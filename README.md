@@ -1,47 +1,34 @@
-# EEG-Conformer
+2025.12.27
+1. dataset_download.py下载了.npy格式BCI_competition_IV2a数据集到dataset里
+2. npy_to_mat.py将.npy格式数据集转换为.mat格式数据集,并且切除了一个无效点
+3. 修改了conformer.py的self.root为'dataset_mat/'
+4. conda activate eeg_conformer
 
-### EEG Conformer: Convolutional Transformer for EEG Decoding and Visualization [[Paper](https://ieeexplore.ieee.org/document/9991178)]
-##### Core idea: spatial-temporal conv + pooling + self-attention
+2025.12.28-29
+1. 运行conformer.py, 结果保存在results/baseline文件夹里
+2. 对SO6,seed1674运行LabelSmoothingCrossEntropyConformer.py, 结果保存在results/LabelSmoothingCrossEntropyConformer文件夹里
+3. 对SO6,seed1674运行MishConformer.py, 结果保存在results/MishConformer文件夹里
+4. 对SO6,seed1674运行SEBlockConformer.py, 结果保存在results/SEBlockConformer文件夹里
+5. 结果对比如下：
+   - baseline: 0.6458333333333334
+   - LabelSmoothingCrossEntropyConformer: 0.6631944444444444
+   - MishConformer: 0.6666666666666666
+   - SEBlockConformer: 0.6458333333333334
 
-### News
-#### 🎉🎉🎉 We've joined in [braindecode](https://braindecode.org/stable/index.html) toolbox. Use [**here**](https://braindecode.org/stable/generated/braindecode.models.EEGConformer.html) for detailed info.
+12.30
+1. 对SO6,seed542进行对比实验验证mish,labelsmooth是不是真的还有促进效果,发现mish有促进效果,而labelsmooth没有,至少说明labelsmooth的效果不好
+2. 为了进一步验证mish的促进效果,对所有对象都运行MishConformer.py,且seed与baseline相同,结果保存在results/mish文件夹里
 
-
-Thanks to [Bru](https://github.com/bruAristimunha) and colleagues for helping with the modifications.
-
-## Abstract
-![Network Architecture](/visualization/Fig1.png)
-
-- We propose a compact convolutional Transformer, EEG Conformer, to encapsulate local and global features in a unified EEG classification framework.  
-- The convolution module learns the low-level local features throughout the one-dimensional temporal and spatial convolution layers. The self-attention module is straightforwardly connected to extract the global correlation within the local temporal features. Subsequently, the simple classifier module based on fully-connected layers is followed to predict the categories for EEG signals. 
-- We also devise a visualization strategy to project the class activation mapping onto the brain topography.
-
-
-## Requirements:
-- Python 3.10
-- Pytorch 1.12
-
-
-## Datasets
-Please use consistent train-val-test split when comparing with other methods.
-- [BCI_competition_IV2a](https://www.bbci.de/competition/iv/) - acc 78.66% (hold out)
-- [BCI_competition_IV2b](https://www.bbci.de/competition/iv/) - acc 84.63% (hold out)
-- [SEED](https://bcmi.sjtu.edu.cn/home/seed/seed.html) - acc 95.30% (5-fold)
-
-
-## Citation
-Hope this code can be useful. I would appreciate you citing us in your paper. 😊
+12.31
+1. 复现消融实验,对比NOTransformer.py,NOaugmentation.py与原baseline的结果
+2. NOTransformer.py注释掉TransformerEncoder, 结果保存在results/NOTransformer文件夹里
+3. NOaugmentation.py注释掉数据增强, 结果保存在results/NOaugmentation文件夹里
+```python
+# data augmentation(下面代码注释掉)
+aug_data, aug_label = self.interaug(self.allData, self.allLabel)
+img = torch.cat((img, aug_data))
+label = torch.cat((label, aug_label))
 ```
-@article{song2023eeg,
-  title = {{{EEG Conformer}}: {{Convolutional Transformer}} for {{EEG Decoding}} and {{Visualization}}},
-  shorttitle = {{{EEG Conformer}}},
-  author = {Song, Yonghao and Zheng, Qingqing and Liu, Bingchuan and Gao, Xiaorong},
-  year = {2023},
-  journal = {IEEE Transactions on Neural Systems and Rehabilitation Engineering},
-  volume = {31},
-  pages = {710--719},
-  issn = {1558-0210},
-  doi = {10.1109/TNSRE.2022.3230250}
-}
-``` 
 
+2026.1.1
+1. 撰写实验报告
